@@ -1,0 +1,271 @@
+// Solid
+@mixin button-variant(
+    $background,
+    $border,
+    $hover-background: darken($background, 7.5%),
+    $hover-border: darken($border, 10%),
+    $active-background: darken($background, 10%),
+    $active-border: darken($border, 12.5%)
+) {
+    color: $white;
+    background: $background !important;
+    border-color: $border !important;
+    @include box-shadow($btn-box-shadow);
+
+    @include hover() {
+        color: $white !important;
+        @include gradient-bg($hover-background);
+        border-color: $hover-border !important;
+    }
+
+    &:focus,
+    &.focus {
+        color: $white !important;
+        @include gradient-bg($hover-background);
+        border-color: none !important;
+        @if $enable-shadows {
+            @include box-shadow(
+                $btn-box-shadow,
+                0 0 0 $btn-focus-width rgba(mix(color-yiq($background), $border, 15%), 0.5)
+            );
+        } @else {
+            // Avoid using mixin so we can pass custom focus shadow properly
+            box-shadow: 0 0 0 $btn-focus-width rgba(mix(color-yiq($background), $border, 15%), 0.5);
+        }
+    }
+
+    // Disabled comes first so active can properly restyle
+    &.disabled,
+    &:disabled {
+        pointer-events: none;
+        color: color-yiq($background);
+        background-color: $background;
+        border-color: $border !important;
+        // Remove CSS gradients if they're enabled
+        @if $enable-gradients {
+            background-image: none;
+        }
+    }
+
+    &:not(:disabled):not(.disabled):active,
+    &:not(:disabled):not(.disabled).active,
+    .show > &.dropdown-toggle {
+        color: color-yiq($active-background);
+        background-color: $active-background !important;
+        @if $enable-gradients {
+            background-image: none; // Remove the gradient for the pressed/active state
+        }
+        border-color: $active-border !important;
+
+        &:focus {
+            @if $enable-shadows and $btn-active-box-shadow != none {
+                @include box-shadow(
+                    $btn-active-box-shadow,
+                    0 0 0 $btn-focus-width rgba(mix(color-yiq($background), $border, 15%), 0.5)
+                );
+            } @else {
+                // Avoid using mixin so we can pass custom focus shadow properly
+                box-shadow: 0 0 0 $btn-focus-width rgba(mix(color-yiq($background), $border, 15%), 0.5);
+            }
+        }
+    }
+}
+
+@each $color, $value in $theme-colors {
+    .btn-#{$color} {
+        @include button-variant($value, $value);
+    }
+}
+
+// Outline
+@mixin button-outline-variant(
+    $color,
+    $color-hover: color-yiq($color),
+    $active-background: $color,
+    $active-border: $color
+) {
+    color: $color !important;
+    border-color: $color !important;
+
+    @include hover() {
+        color: $b-0 !important;
+        background-color: $active-background !important;
+        border-color: $active-border !important;
+    }
+
+    &:focus,
+    &.focus {
+        box-shadow: 0 0 0 $btn-focus-width rgba($color, 0.5);
+    }
+
+    &.disabled,
+    &:disabled {
+        color: $color;
+        background-color: transparent;
+    }
+
+    &:not(:disabled):not(.disabled):active,
+    &:not(:disabled):not(.disabled).active,
+    .show > &.dropdown-toggle {
+        color: color-yiq($active-background);
+        background-color: $active-background;
+        border-color: $active-border !important;
+
+        &:focus {
+            @if $enable-shadows and $btn-active-box-shadow != none {
+                @include box-shadow($btn-active-box-shadow, 0 0 0 $btn-focus-width rgba($color, 0.5));
+            } @else {
+                // Avoid using mixin so we can pass custom focus shadow properly
+                box-shadow: 0 0 0 $btn-focus-width rgba($color, 0.5);
+            }
+        }
+    }
+}
+
+@each $color, $value in $theme-colors {
+    .btn-outline-#{$color} {
+        @include button-outline-variant($value);
+    }
+}
+
+// Forms
+@mixin form-validation-state-selector($state) {
+    @if ($state == "valid" or $state == "invalid") {
+        .was-validated #{if(&, "&", "")}:#{$state},
+        #{if(&, "&", "")}.is-#{$state} {
+            @content;
+        }
+    } @else {
+        #{if(&, "&", "")}.is-#{$state} {
+            @content;
+        }
+    }
+}
+
+@mixin form-validation-state($state, $color, $icon) {
+    .form-control {
+        @include form-validation-state-selector($state) {
+            border-color: $color !important;
+
+            &:focus {
+                border-color: $color !important;
+                box-shadow: 0 0 0 $input-focus-width rgba($color, 0.25);
+            }
+        }
+    }
+
+    .custom-select {
+        @include form-validation-state-selector($state) {
+            border-color: $color !important;
+
+            &:focus {
+                border-color: $color !important;
+                box-shadow: 0 0 0 $input-focus-width rgba($color, 0.25);
+            }
+        }
+    }
+
+    .custom-control-input {
+        @include form-validation-state-selector($state) {
+            ~ .custom-control-label {
+                &::before {
+                    border-color: $color !important;
+                }
+            }
+
+            &:checked {
+                ~ .custom-control-label::before {
+                    border-color: lighten($color, 10%) !important;
+                    @include gradient-bg(lighten($color, 10%) !important);
+                }
+            }
+
+            &:focus {
+                &:not(:checked) ~ .custom-control-label::before {
+                    border-color: $color !important;
+                }
+            }
+        }
+    }
+}
+
+@each $state, $data in $form-validation-states {
+    @include form-validation-state($state, map-get($data, color), map-get($data, icon));
+}
+
+@each $color, $value in $theme-colors {
+    // Toast
+    .b-toast-#{$color} {
+        .toast {
+            background: lighten($value, 10%) !important;
+            border-color: $value !important;
+            color: $white !important;
+
+            .toast-header {
+                color: $white !important;
+                background: $value !important;
+                border-color: $value !important;
+            }
+
+            .toast-body {
+                background: lighten($value, 10%) !important;
+            }
+        }
+    }
+
+    // Popover
+    .b-popover-#{$color} {
+        background: lighten($value, 10%) !important;
+        border-color: $value !important;
+
+        &.bs-popover-right > .arrow::before,
+        &.bs-popover-auto[data-popper-placement^="right"] > .arrow::before {
+            border-right-color: lighten($value, 10%) !important;
+        }
+
+        &.bs-popover-right > .arrow::after,
+        &.bs-popover-auto[data-popper-placement^="right"] > .arrow::after {
+            border-right-color: lighten($value, 10%) !important;
+        }
+
+        &.bs-popover-left > .arrow::before,
+        &.bs-popover-auto[data-popper-placement^="left"] > .arrow::before {
+            border-left-color: lighten($value, 10%) !important;
+        }
+
+        &.bs-popover-left > .arrow::after,
+        &.bs-popover-auto[data-popper-placement^="left"] > .arrow::after {
+            border-left-color: lighten($value, 10%) !important;
+        }
+
+        &.bs-popover-bottom > .arrow::before,
+        &.bs-popover-auto[data-popper-placement^="bottom"] > .arrow::before {
+            border-bottom-color: lighten($value, 10%) !important;
+        }
+
+        &.bs-popover-bottom > .arrow::after,
+        &.bs-popover-auto[data-popper-placement^="bottom"] > .arrow::after {
+            border-bottom-color: lighten($value, 10%) !important;
+        }
+
+        &.bs-popover-top > .arrow::before,
+        &.bs-popover-auto[data-popper-placement^="top"] > .arrow::before {
+            border-top-color: lighten($value, 10%) !important;
+        }
+
+        &.bs-popover-top > .arrow::after,
+        &.bs-popover-auto[data-popper-placement^="top"] > .arrow::after {
+            border-top-color: lighten($value, 10%) !important;
+        }
+
+        .popover-header {
+            color: $white !important;
+            background: $value !important;
+            border-color: $value !important;
+        }
+
+        .popover-body {
+            color: $white !important;
+        }
+    }
+}

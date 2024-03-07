@@ -1,0 +1,34 @@
+// Bootstrap
+@import "./bootstrap.scss";
+
+// Colors
+@import "./colors.scss";
+
+// Base
+@import "./core/base/base.scss";
+@import "./core/base/typography.scss";
+
+// Components
+@import "./components.scss";
+
+// Layouts
+@import "./core/layouts/header.scss";
+@import "./core/layouts/horizontal-menu.scss";
+@import "./core/layouts/sider.scss";
+@import "./core/layouts/page-content.scss";
+
+// Pages
+@import "./core/pages/page-error.scss";
+
+// Theme Dark
+@import "./core/theme/colors-dark.scss";
+@import "./core/theme/theme-dark.scss";
+
+// RTL
+@import "./custom-rtl.scss";
+
+// Custom
+@import "./custom/style.scss";
+
+// Custom RTl
+@import "./custom/style-rtl.scss";
